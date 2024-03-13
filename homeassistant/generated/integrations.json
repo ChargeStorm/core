@@ -3850,6 +3850,12 @@
       "config_flow": false,
       "iot_class": "cloud_push"
     },
+    "nanogrid_air": {
+      "name": "Nanogrid Air",
+      "integration_type": "hub",
+      "config_flow": true,
+      "iot_class": "local_polling"
+    },
     "nanoleaf": {
       "name": "Nanoleaf",
       "integration_type": "hub",

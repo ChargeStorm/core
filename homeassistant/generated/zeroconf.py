@@ -605,6 +605,11 @@ ZEROCONF = {
             "domain": "nanoleaf",
         },
     ],
+    "_nghome._tcp.local.": [
+        {
+            "domain": "nanogrid_air",
+        },
+    ],
     "_nut._tcp.local.": [
         {
             "domain": "nut",

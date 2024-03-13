@@ -13,6 +13,9 @@ MQTT = {
     "fully_kiosk": [
         "fully/deviceInfo/+",
     ],
+    "nanogrid_air": [
+        "ctek/nga",
+    ],
     "tasmota": [
         "tasmota/discovery/#",
     ],
