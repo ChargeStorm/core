@@ -1,0 +1,8 @@
+{
+  "domain": "nanogrid_air",
+  "name": "Nanogrid Air",
+  "codeowners": ["@chargestorm"],
+  "config_flow": true,
+  "documentation": "https://www.home-assistant.io/integrations/nanogrid_air",
+  "iot_class": "local_polling"
+}

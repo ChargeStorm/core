@@ -1030,6 +1030,17 @@
       "config_flow": true,
       "iot_class": "cloud_push"
     },
+    "ctek": {
+      "name": "CTEK",
+      "integrations": {
+        "nanogrid_air": {
+          "integration_type": "hub",
+          "config_flow": true,
+          "iot_class": "local_polling",
+          "name": "Nanogrid Air"
+        }
+      }
+    },
     "cups": {
       "name": "CUPS",
       "integration_type": "hub",

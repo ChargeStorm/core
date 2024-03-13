@@ -333,6 +333,7 @@ FLOWS = {
         "mystrom",
         "myuplink",
         "nam",
+        "nanogrid_air",
         "nanoleaf",
         "neato",
         "nest",

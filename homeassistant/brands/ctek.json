@@ -1,0 +1,5 @@
+{
+  "domain": "ctek",
+  "name": "CTEK",
+  "integrations": ["nanogrid_air"]
+}
