@@ -249,23 +249,14 @@ class NanogridAirSensor(SensorEntity):
                     if index is not None:
                         self._state = self._voltages[index]
 
-                elif self._type == CONF_TOPIC_TOTAL_ENERGY_IMPORT:
-                    self._state = self._total_energy_import
-
-                elif self._type == CONF_TOPIC_TOTAL_ENERGY_EXPORT:
-                    self._state = self._total_energy_export
-
-                elif self._type == CONF_STATE_TOPIC_POWER_IN:
-                    self._state = self._power_in
-
-                elif self._type == CONF_STATE_TOPIC_POWER_OUT:
-                    self._state = self._power_out
-
-                elif self._type == CONF_STATE_TOPIC_TOTAL_ENERGY_IMPORT:
-                    self._state = self._total_energy_import
-
-                elif self._type == CONF_STATE_TOPIC_TOTAL_ENERGY_EXPORT:
-                    self._state = self._total_energy_export
+                elif self._sensor_id == CONF_STATE_TOPIC_POWER_IN:
+                    self._state = payload.get("activePowerIn")
+                elif self._sensor_id == CONF_STATE_TOPIC_POWER_OUT:
+                    self._state = payload.get("activePowerOut")
+                elif self._sensor_id == CONF_STATE_TOPIC_TOTAL_ENERGY_IMPORT:
+                    self._state = payload.get("totalEnergyActiveImport")
+                elif self._sensor_id == CONF_STATE_TOPIC_TOTAL_ENERGY_EXPORT:
+                    self._state = payload.get("totalEnergyActiveExport")
 
             _LOGGER.debug("Updated entity state to {self._state}")
 
