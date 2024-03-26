@@ -4,8 +4,6 @@ from collections.abc import Callable
 import json
 import logging
 
-from helpers.typing import UndefinedType
-
 from homeassistant.components.mqtt import async_subscribe, async_wait_for_mqtt_client
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -23,6 +21,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import UndefinedType
 
 from .const import (
     CONF_STATE_TOPIC_CURRENT,
