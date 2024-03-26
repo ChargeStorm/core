@@ -4,6 +4,8 @@ from collections.abc import Callable
 import json
 import logging
 
+from helpers.typing import UndefinedType
+
 from homeassistant.components.mqtt import async_subscribe, async_wait_for_mqtt_client
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -170,22 +172,22 @@ class NanogridAirSensor(SensorEntity):
         return self._unique_id
 
     @property
-    def name(self):
+    def name(self) -> str | UndefinedType | None:
         """Return the name of the sensor."""
         return self.entity_description.name
 
     @property
-    def device_class(self):
+    def device_class(self) -> SensorDeviceClass | None:
         """Return the class of this device, from SensorDeviceClass."""
         return self.entity_description.device_class
 
     @property
-    def native_unit_of_measurement(self):
+    def native_unit_of_measurement(self) -> str | None:
         """Return the unit of measurement."""
         return self.entity_description.native_unit_of_measurement
 
     @property
-    def state_class(self):
+    def state_class(self) -> str | None:
         """Return the state class of this entity, if any."""
         return self.entity_description.state_class
 
