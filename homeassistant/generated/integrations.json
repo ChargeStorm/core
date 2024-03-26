@@ -853,6 +853,17 @@
       "config_flow": false,
       "iot_class": "local_polling"
     },
+    "chargestorm": {
+      "name": "ChargeStorm",
+      "integrations": {
+        "nanogrid_air": {
+          "integration_type": "hub",
+          "config_flow": true,
+          "iot_class": "local_polling",
+          "name": "Nanogrid Air"
+        }
+      }
+    },
     "circuit": {
       "name": "Unify Circuit",
       "integration_type": "hub",
@@ -3849,12 +3860,6 @@
       "integration_type": "hub",
       "config_flow": false,
       "iot_class": "cloud_push"
-    },
-    "nanogrid_air": {
-      "name": "Nanogrid Air",
-      "integration_type": "hub",
-      "config_flow": true,
-      "iot_class": "local_polling"
     },
     "nanoleaf": {
       "name": "Nanoleaf",

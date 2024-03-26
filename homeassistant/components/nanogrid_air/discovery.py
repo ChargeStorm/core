@@ -38,7 +38,7 @@ async def discover_service(
 
 async def create_and_publish_service(
     hass: HomeAssistant, service_type="_nghome._tcp.local.", ip="127.0.0.1", port=1883
-) -> None:
+) -> None | str:
     """Create and publish a mDNS service."""
 
     zc = await async_get_instance(hass)
@@ -52,3 +52,5 @@ async def create_and_publish_service(
         server="example.local.",
     )
     await hass.async_add_executor_job(zc.register_service, info)
+
+    return None

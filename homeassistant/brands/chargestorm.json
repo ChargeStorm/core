@@ -1,0 +1,5 @@
+{
+  "domain": "chargestorm",
+  "name": "ChargeStorm",
+  "integrations": ["nanogrid_air"]
+}

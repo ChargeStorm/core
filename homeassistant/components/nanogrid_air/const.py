@@ -4,7 +4,7 @@ DOMAIN = "nanogrid_air"
 
 CONF_TOPIC_CURRENT = "current"
 CONF_TOPIC_VOLTAGE = "voltage"
-CONF_TOPIC_NANOGRID_AIR = "ctek/nga-simulator"
+CONF_TOPIC_NANOGRID_AIR = "ctek/nga"
 CONF_TOPIC_ACTIVE_POWER_IN = "activePowerIn"
 CONF_TOPIC_ACTIVE_POWER_OUT = "activePowerOut"
 CONF_TOPIC_TOTAL_ENERGY_IMPORT = "totalEnergyActiveImport"
