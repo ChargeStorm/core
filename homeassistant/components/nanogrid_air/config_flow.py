@@ -23,7 +23,6 @@ class NanogridAirConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict = {}
 
         if user_input is not None:
-            # broker_choice = user_input["broker_choice"]
             return self.async_create_entry(title="Nanogrid Air", data=user_input)
 
         return self.async_show_form(
