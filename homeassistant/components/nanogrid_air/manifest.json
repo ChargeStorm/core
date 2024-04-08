@@ -5,10 +5,7 @@
   "config_flow": true,
   "dependencies": ["zeroconf", "mqtt"],
   "documentation": "https://www.home-assistant.io/integrations/nanogrid_air",
-  "homekit": {},
   "iot_class": "local_polling",
   "mqtt": ["ctek/nga"],
-  "requirements": [],
-  "ssdp": [],
   "zeroconf": ["_nghome._tcp.local."]
 }
