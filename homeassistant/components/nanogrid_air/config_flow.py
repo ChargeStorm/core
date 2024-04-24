@@ -35,12 +35,6 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None) -> ConfigFlowResult:
         """Handle a flow initiated by the user."""
 
-        # Det måste läggas in ett unique_id för att integrationen går att hitta automatiskt
-        # unique_id =
-        # if unique_id:
-        #     await self.async_set_unique_id(unique_id)
-        # await self._async_handle_discovery_without_unique_id()
-
         if self._async_current_entries():
             return self.async_abort(reason="single_instance_allowed")
 
