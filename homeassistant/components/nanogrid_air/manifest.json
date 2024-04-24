@@ -1,11 +1,14 @@
 {
   "domain": "nanogrid_air",
   "name": "Nanogrid Air",
-  "codeowners": ["@ChargeStorm"],
+  "codeowners": ["@chargestorm"],
   "config_flow": true,
-  "dependencies": ["zeroconf", "mqtt"],
   "documentation": "https://www.home-assistant.io/integrations/nanogrid_air",
   "iot_class": "local_polling",
-  "mqtt": ["ctek/nga"],
-  "zeroconf": ["_nghome._tcp.local."]
+  "zeroconf": [
+    {
+      "type": "_http._tcp.local.",
+      "name": "ctek-ng-air.local."
+    }
+  ]
 }

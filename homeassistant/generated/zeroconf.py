@@ -488,6 +488,10 @@ ZEROCONF = {
             },
         },
         {
+            "domain": "nanogrid_air",
+            "name": "ctek-ng-air.local.",
+        },
+        {
             "domain": "pure_energie",
             "name": "smartbridge*",
         },
@@ -603,11 +607,6 @@ ZEROCONF = {
     "_nanoleafms._tcp.local.": [
         {
             "domain": "nanoleaf",
-        },
-    ],
-    "_nghome._tcp.local.": [
-        {
-            "domain": "nanogrid_air",
         },
     ],
     "_nut._tcp.local.": [
