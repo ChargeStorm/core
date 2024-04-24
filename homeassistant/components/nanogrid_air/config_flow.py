@@ -17,9 +17,13 @@ from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN
-
-DEFAULT_URL = "http://ctek-ng-air.local/meter/"
+from .const import (
+    API_METER,
+    API_STATUS,
+    DOMAIN,
+    ERROR_NOT_RESPONDING,
+    ERROR_SINGLE_INSTANCE_ALLOWED,
+)
 
 
 class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -30,23 +34,33 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
 
     def __init__(self) -> None:
         """Initialize flow."""
-        self._url = DEFAULT_URL
+        self._url = API_METER
 
     async def async_step_user(self, user_input=None) -> ConfigFlowResult:
         """Handle a flow initiated by the user."""
 
+        session = async_get_clientsession(self.hass)
+
         if self._async_current_entries():
-            return self.async_abort(reason="single_instance_allowed")
+            return self.async_abort(reason=ERROR_SINGLE_INSTANCE_ALLOWED)
 
         if user_input is None:
             return self.async_show_form(
                 step_id="user",
                 data_schema=vol.Schema(
                     {
-                        vol.Optional(CONF_URL, default=DEFAULT_URL): str,
+                        vol.Optional(CONF_URL, default=API_METER): str,
                     }
                 ),
             )
+
+        mac_res = await session.get(API_STATUS)
+        mac_res.raise_for_status()
+        mac = await mac_res.json()
+        mac_address = mac["deviceInfo"]["mac"]
+
+        await self.async_set_unique_id(mac_address)
+        self._abort_if_unique_id_configured()
 
         self._url = user_input[CONF_URL]
         return await self._test_connection()
@@ -65,11 +79,12 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
         try:
             response = await session.get(self._url)
             response.raise_for_status()
+
             return self.async_create_entry(
                 title="Nanogrid Air", data={"url": self._url}
             )
         except ClientError:
-            return self.async_abort(reason="not_responding")
+            return self.async_abort(reason=ERROR_NOT_RESPONDING)
         except HomeAssistantError as ha_err:
             return self.async_abort(reason=str(ha_err))
 
@@ -100,7 +115,7 @@ class NanogridAirOptionsFlowHandler(OptionsFlow):
                 {
                     vol.Optional(
                         CONF_URL,
-                        default=self.config_entry.options.get(CONF_URL, DEFAULT_URL),
+                        default=self.config_entry.options.get(CONF_URL, API_METER),
                     ): str,
                 }
             ),
