@@ -3,30 +3,17 @@
     "step": {
       "user": {
         "data": {
-          "url": "URL of the Nanogrid Air device"
+          "description": "Nanogrid Air has been discovered on your network. Confirm to set up."
         }
-      },
-      "zeroconf": {
-        "description": "Nanogrid Air has been discovered on your network. Confirm to set up."
       }
     },
     "error": {
-      "not_responding": "The Nanogrid Air device is not responding. Please check the device and try again.",
+      "not_responding": "Nanogrid Air is not responding. Please check the device and try again.",
       "single_instance_allowed": "Only one instance of Nanogrid Air can be configured."
     },
     "abort": {
-      "single_instance_allowed": "You already have a Nanogrid Air configured.",
+      "already_configured": "You already have a Nanogrid Air configured.",
       "not_responding": "Failed to connect to Nanogrid Air due to no response from the device."
-    }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "title": "Adjust your Nanogrid Air settings",
-        "data": {
-          "url": "URL of the Nanogrid Air device"
-        }
-      }
     }
   }
 }

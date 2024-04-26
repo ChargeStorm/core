@@ -24,7 +24,7 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
 )
 
-from .api import fetch_data
+from .api import fetch_meter_data
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -110,7 +110,7 @@ async def async_setup_entry(
         hass,
         _LOGGER,
         name="nanogrid_air",
-        update_method=fetch_data,
+        update_method=fetch_meter_data,
         update_interval=timedelta(seconds=1),
     )
 
