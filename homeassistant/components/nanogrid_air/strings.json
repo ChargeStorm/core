@@ -3,17 +3,17 @@
     "step": {
       "user": {
         "data": {
-          "description": "Nanogrid Air has been discovered on your network. Confirm to set up."
+          "description": "Nanogrid Air has been detected on your network. Confirm setup to access real-time monitoring and control features."
         }
       }
     },
     "error": {
-      "not_responding": "Nanogrid Air is not responding. Please check the device and try again.",
-      "single_instance_allowed": "Only one instance of Nanogrid Air can be configured."
+      "not_responding": "Nanogrid Air is not responding. Ensure the device is powered and connected to your network, then try again.",
+      "single_instance_allowed": "Only one instance of Nanogrid Air can be configured. Please manage your existing device from the Integrations page."
     },
     "abort": {
-      "already_configured": "You already have a Nanogrid Air configured.",
-      "not_responding": "Failed to connect to Nanogrid Air due to no response from the device."
+      "already_configured": "A Nanogrid Air device is already configured. If you need to reconfigure, please remove the existing instance first.",
+      "not_responding": "Connection attempt failed as Nanogrid Air did not respond. Check the device's network connectivity and power status."
     }
   }
 }

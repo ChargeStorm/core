@@ -5,59 +5,36 @@ import socket
 
 import aiohttp
 
+from homeassistant.exceptions import ConfigEntryNotReady
+
 _LOGGER = logging.getLogger(__name__)
 
 
-async def fetch_status_data():
-    """Fetch mac address from status API."""
+async def fetch_data():
+    """Fetch IP, MAC address, and meter data from the Nanogrid Air device."""
+    hostname = "ctek-ng-air.local"
     try:
-        ip = socket.gethostbyname("ctek-ng-air.local")
+        ip = socket.gethostbyname(hostname)
         _LOGGER.debug("Resolved IP: %s", ip)
     except socket.gaierror as e:
         _LOGGER.error("Failed to resolve hostname: %s", e)
-        return
-
-    url_status = f"http://{ip}/status/"
+        raise ConfigEntryNotReady("Failed to resolve IP address for Nanogrid Air.")  # noqa: B904
 
     async with aiohttp.ClientSession() as session:
+        url_status = f"http://{ip}/status/"
+        url_meter = f"http://{ip}/meter/"
+
         try:
-            async with session.get(url_status) as api_status_resonse:
-                api_status_resonse.raise_for_status()
-                mac = await api_status_resonse.json()
-                mac_address = mac["deviceInfo"]["mac"]
-                return mac_address
-        except aiohttp.ClientError as exc:
-            _LOGGER.error("HTTP client error occurred: %s", exc)
-            return {}
-        except aiohttp.HttpProcessingError as exc:
-            _LOGGER.error(
-                "HTTP request error occurred: %s - %s", exc.status, exc.message
-            )
-            return {}
+            async with session.get(url_status) as response:
+                response.raise_for_status()
+                status_data = await response.json()
+                mac_address = status_data["deviceInfo"]["mac"]
 
+            async with session.get(url_meter) as response:
+                response.raise_for_status()
+                meter_data = await response.json()
 
-async def fetch_meter_data():
-    """Fetch data from the API and return as a dictionary."""
-    try:
-        ip = socket.gethostbyname("ctek-ng-air.local")
-        _LOGGER.debug("Resolved IP: %s", ip)
-    except socket.gaierror as e:
-        _LOGGER.error("Failed to resolve hostname: %s", e)
-        return
-
-    url_meter = f"http://{ip}/meter/"
-
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.get(url_meter) as api_meter_response:
-                api_meter_response.raise_for_status()
-                api_meter_data = await api_meter_response.json()
-                return api_meter_data
-        except aiohttp.ClientError as exc:
-            _LOGGER.error("HTTP client error occurred: %s", exc)
-            return {}
-        except aiohttp.HttpProcessingError as exc:
-            _LOGGER.error(
-                "HTTP request error occurred: %s - %s", exc.status, exc.message
-            )
-            return {}
+            return mac_address, meter_data
+        except (aiohttp.ClientError, aiohttp.HttpProcessingError) as e:
+            _LOGGER.error("HTTP error occurred: %s", e)
+            raise ConfigEntryNotReady(f"HTTP error accessing Nanogrid Air at {ip}.")  # noqa: B904

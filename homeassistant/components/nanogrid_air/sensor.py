@@ -1,4 +1,5 @@
 """Platform for Nanogrid Air sensor."""
+
 from datetime import timedelta
 import logging
 
@@ -24,7 +25,7 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
 )
 
-from .api import fetch_meter_data
+from .api import fetch_data
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -106,11 +107,16 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up sensor entities for the integration entry."""
+
+    async def update_data():
+        _, meter_data = await fetch_data()
+        return meter_data
+
     coordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,
         name="nanogrid_air",
-        update_method=fetch_meter_data,
+        update_method=update_data,
         update_interval=timedelta(seconds=1),
     )
 
