@@ -25,7 +25,7 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
 )
 
-from .api import fetch_data
+from .api import fetch_meter_data
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -109,7 +109,7 @@ async def async_setup_entry(
     """Set up sensor entities for the integration entry."""
 
     async def update_data():
-        _, meter_data = await fetch_data()
+        meter_data = await fetch_meter_data()
         return meter_data
 
     coordinator = DataUpdateCoordinator(

@@ -6,7 +6,7 @@ from homeassistant.components.zeroconf import ZeroconfServiceInfo
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.exceptions import ConfigEntryNotReady
 
-from .api import _LOGGER, fetch_data
+from .api import _LOGGER, fetch_mac, fetch_meter_data
 from .const import DOMAIN
 
 API_DEFAULT = "http://ctek-ng-air.local/meter/"
@@ -27,7 +27,7 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
         self._async_abort_entries_match()
 
         try:
-            mac_address, _ = await fetch_data()
+            mac_address = await fetch_mac()
             unique_id = mac_address
         except ConfigEntryNotReady as e:
             _LOGGER.error("Configuration step failed: %s", e)
@@ -44,9 +44,9 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
         """Handle Zeroconf discovery."""
         self._url = f"http://{discovery_info.host}/meter/"
         try:
-            _, meter_data = await fetch_data()
+            entity_data = await fetch_meter_data()
             return self.async_create_entry(
-                title="Nanogrid Air", data={"meter_data": meter_data}
+                title="Nanogrid Air", data={"entity_data": entity_data}
             )
         except ConfigEntryNotReady as e:
             _LOGGER.error("Zeroconf discovery failed: %s", e)

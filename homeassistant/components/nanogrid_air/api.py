@@ -1,50 +1,64 @@
 """Fetch API for Nanogrid Air."""
 
-import asyncio
 import logging
 import socket
 
 import aiohttp
 
-from homeassistant.exceptions import ConfigEntryNotReady
-
 _LOGGER = logging.getLogger(__name__)
 
 
-async def fetch_data(hostname="ctek-ng-air.local", retry_delay=1, max_retries=5):
-    """Fetch IP, MAC address, and meter data from the Nanogrid Air device with retries."""
-    attempts = 0
-    while attempts < max_retries:
+async def get_ip():
+    """Fetch IP address from hostname."""
+    try:
+        ip = socket.gethostbyname("ctek-ng-air.local")
+        _LOGGER.debug("Resolved IP: %s", ip)
+        return ip
+    except socket.gaierror as e:
+        _LOGGER.error("Failed to resolve hostname: %s", e)
+        return
+
+
+async def fetch_mac():
+    """Fetch mac address from status API."""
+    ip = await get_ip()
+
+    url_status = f"http://{ip}/status/"
+
+    async with aiohttp.ClientSession() as session:
         try:
-            ip = socket.gethostbyname(hostname)
-            _LOGGER.debug("Resolved IP: %s", ip)
-
-            async with aiohttp.ClientSession() as session:
-                url_status = f"http://{ip}/status/"
-                url_meter = f"http://{ip}/meter/"
-
-                async with session.get(url_status) as response:
-                    response.raise_for_status()
-                    status_data = await response.json()
-                    mac_address = status_data["deviceInfo"]["mac"]
-                    _LOGGER.debug("MAC Address fetched: %s", mac_address)
-
-                async with session.get(url_meter) as response:
-                    response.raise_for_status()
-                    meter_data = await response.json()
-                    _LOGGER.debug("Meter data fetched: %s", meter_data)
-
-                return mac_address, meter_data
-
-        except (socket.gaierror, aiohttp.ClientConnectionError) as e:
+            async with session.get(url_status) as api_status_response:
+                api_status_response.raise_for_status()
+                mac = await api_status_response.json()
+                mac_address = mac["deviceInfo"]["mac"]
+                return mac_address
+        except aiohttp.ClientError as exc:
+            _LOGGER.error("HTTP client error occurred: %s", exc)
+            return {}
+        except aiohttp.HttpProcessingError as exc:
             _LOGGER.error(
-                "Error fetching data: %s. Attempt number: %s", e, attempts + 1
+                "HTTP request error occurred: %s - %s", exc.status, exc.message
             )
-            attempts += 1
-            await asyncio.sleep(retry_delay)
-            retry_delay *= 2
+            return {}
 
-    _LOGGER.error("Failed to connect to Nanogrid Air after %s attempts", max_retries)
-    raise ConfigEntryNotReady(
-        f"Failed to connect to Nanogrid Air after {max_retries} attempts."
-    )
+
+async def fetch_meter_data():
+    """Fetch data from the API and return as a dictionary."""
+    ip = await get_ip()
+
+    url_meter = f"http://{ip}/meter/"
+
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url_meter) as api_meter_response:
+                api_meter_response.raise_for_status()
+                api_meter_data = await api_meter_response.json()
+                return api_meter_data
+        except aiohttp.ClientError as exc:
+            _LOGGER.error("HTTP client error occurred: %s", exc)
+            return {}
+        except aiohttp.HttpProcessingError as exc:
+            _LOGGER.error(
+                "HTTP request error occurred: %s - %s", exc.status, exc.message
+            )
+            return {}
