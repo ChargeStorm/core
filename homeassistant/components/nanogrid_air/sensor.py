@@ -117,19 +117,19 @@ async def async_setup_entry(
         _LOGGER,
         name="nanogrid_air",
         update_method=update_data,
-        update_interval=timedelta(seconds=1),
+        update_interval=timedelta(seconds=5),
     )
 
     await coordinator.async_config_entry_first_refresh()
 
-    sensors = []
+    sensor_entities = []
     for sensor_id, sensor_description in SENSOR.items():
         unique_id = f"{entry.data.get(CONF_UNIQUE_ID, 'default_unique_id')}_{sensor_description.key}"
-        sensors.append(
+        sensor_entities.append(
             NanogridAirSensor(coordinator, unique_id, sensor_id, sensor_description)
         )
 
-    async_add_entities(sensors, True)
+    async_add_entities(sensor_entities, True)
     _LOGGER.debug("Initial data fetched: %s", coordinator.data)
 
 
