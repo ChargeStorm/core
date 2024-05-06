@@ -117,7 +117,7 @@ async def async_setup_entry(
         _LOGGER,
         name="nanogrid_air",
         update_method=update_data,
-        update_interval=timedelta(seconds=5),
+        update_interval=timedelta(seconds=1),
     )
 
     await coordinator.async_config_entry_first_refresh()

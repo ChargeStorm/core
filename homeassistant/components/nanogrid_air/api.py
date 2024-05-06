@@ -33,7 +33,7 @@ async def fetch_mac():
                 mac_address = mac["deviceInfo"]["mac"]
                 return mac_address
         except aiohttp.ClientError as exc:
-            _LOGGER.error("HTTP client error occurred: %s", exc)
+            _LOGGER.error("HTTP client error occurred in fetch_mac: %s", exc)
             return {}
         except aiohttp.HttpProcessingError as exc:
             _LOGGER.error(
@@ -55,7 +55,7 @@ async def fetch_meter_data():
                 api_meter_data = await api_meter_response.json()
                 return api_meter_data
         except aiohttp.ClientError as exc:
-            _LOGGER.error("HTTP client error occurred: %s", exc)
+            _LOGGER.error("HTTP client error occurred in fetch_meter: %s", exc)
             return {}
         except aiohttp.HttpProcessingError as exc:
             _LOGGER.error(
