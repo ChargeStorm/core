@@ -488,10 +488,6 @@ ZEROCONF = {
             },
         },
         {
-            "domain": "nanogrid_air",
-            "name": "ctek-ng-air.local.",
-        },
-        {
             "domain": "pure_energie",
             "name": "smartbridge*",
         },

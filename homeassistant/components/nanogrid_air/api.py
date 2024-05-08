@@ -1,29 +1,35 @@
 """Fetch API for Nanogrid Air."""
 
-import logging
 import socket
 
 import aiohttp
 
-_LOGGER = logging.getLogger(__name__)
+from homeassistant.core import _LOGGER
+
+device_ip: str | None = None
 
 
-async def get_ip():
+async def get_ip(users_ip=None):
     """Fetch IP address from hostname."""
+    if users_ip:
+        globals()["device_ip"] = users_ip
+        return True
+
     try:
         ip = socket.gethostbyname("ctek-ng-air.local")
-        _LOGGER.debug("Resolved IP: %s", ip)
-        return ip
+        if ip:
+            _LOGGER.debug("Resolved IP: %s", ip)
+            globals()["device_ip"] = ip
+            _LOGGER.debug("Device IP: %s", globals()["device_ip"])
+            return True
     except socket.gaierror as e:
         _LOGGER.error("Failed to resolve hostname: %s", e)
-        return
+        return False
 
 
 async def fetch_mac():
     """Fetch mac address from status API."""
-    ip = await get_ip()
-
-    url_status = f"http://{ip}/status/"
+    url_status = f"http://{device_ip}/status/"
 
     async with aiohttp.ClientSession() as session:
         try:
@@ -33,7 +39,8 @@ async def fetch_mac():
                 mac_address = mac["deviceInfo"]["mac"]
                 return mac_address
         except aiohttp.ClientError as exc:
-            _LOGGER.error("HTTP client error occurred in fetch_mac: %s", exc)
+            _LOGGER.error("HTTP client error occurred: %s", exc)
+            await get_ip()
             return {}
         except aiohttp.HttpProcessingError as exc:
             _LOGGER.error(
@@ -44,9 +51,7 @@ async def fetch_mac():
 
 async def fetch_meter_data():
     """Fetch data from the API and return as a dictionary."""
-    ip = await get_ip()
-
-    url_meter = f"http://{ip}/meter/"
+    url_meter = f"http://{device_ip}/meter/"
 
     async with aiohttp.ClientSession() as session:
         try:
@@ -55,7 +60,8 @@ async def fetch_meter_data():
                 api_meter_data = await api_meter_response.json()
                 return api_meter_data
         except aiohttp.ClientError as exc:
-            _LOGGER.error("HTTP client error occurred in fetch_meter: %s", exc)
+            _LOGGER.error("HTTP client error occurred: %s", exc)
+            await get_ip()
             return {}
         except aiohttp.HttpProcessingError as exc:
             _LOGGER.error(

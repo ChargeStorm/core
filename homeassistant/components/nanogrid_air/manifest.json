@@ -4,11 +4,5 @@
   "codeowners": ["@chargestorm"],
   "config_flow": true,
   "documentation": "https://www.home-assistant.io/integrations/nanogrid_air",
-  "iot_class": "local_polling",
-  "zeroconf": [
-    {
-      "type": "_http._tcp.local.",
-      "name": "ctek-ng-air.local."
-    }
-  ]
+  "iot_class": "local_polling"
 }

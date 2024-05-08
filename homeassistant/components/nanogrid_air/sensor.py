@@ -1,7 +1,6 @@
 """Platform for Nanogrid Air sensor."""
 
 from datetime import timedelta
-import logging
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -17,7 +16,7 @@ from homeassistant.const import (
     UnitOfEnergy,
     UnitOfPower,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import _LOGGER, HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import UndefinedType
 from homeassistant.helpers.update_coordinator import (
@@ -26,8 +25,6 @@ from homeassistant.helpers.update_coordinator import (
 )
 
 from .api import fetch_meter_data
-
-_LOGGER = logging.getLogger(__name__)
 
 SENSOR = {
     "current_0": SensorEntityDescription(
@@ -117,7 +114,7 @@ async def async_setup_entry(
         _LOGGER,
         name="nanogrid_air",
         update_method=update_data,
-        update_interval=timedelta(seconds=1),
+        update_interval=timedelta(seconds=10),
     )
 
     await coordinator.async_config_entry_first_refresh()
