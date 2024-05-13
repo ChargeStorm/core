@@ -2,9 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "data": {
-          "description": "Nanogrid Air has been detected on your network. Confirm setup to access real-time monitoring and control features."
-        }
+        "description": "Couldn't automatically connect to the device. Please input the IP address."
       }
     },
     "error": {

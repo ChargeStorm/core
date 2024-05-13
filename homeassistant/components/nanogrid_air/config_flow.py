@@ -11,8 +11,8 @@ from .api import fetch_mac, get_ip
 from .const import DOMAIN
 
 API_DEFAULT = "http://ctek-ng-air.local/meter/"
-IP_INPUT_FIELD = "Delete me and enter device's IP"
 TITLE = "Nanogrid Air"
+DATA_DESC = "description"
 
 
 class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -46,7 +46,7 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
                 step_id="user",
                 data_schema=vol.Schema(
                     {
-                        vol.Optional(CONF_URL, default=IP_INPUT_FIELD): str,
+                        vol.Optional(CONF_URL, DATA_DESC): str,
                     }
                 ),
             )
