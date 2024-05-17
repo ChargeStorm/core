@@ -901,6 +901,7 @@ build.json @home-assistant/supervisor
 /homeassistant/components/nam/ @bieniu
 /tests/components/nam/ @bieniu
 /homeassistant/components/nanogrid_air/ @chargestorm
+/tests/components/nanogrid_air/ @chargestorm
 /homeassistant/components/nanoleaf/ @milanmeu
 /tests/components/nanoleaf/ @milanmeu
 /homeassistant/components/neato/ @Santobert

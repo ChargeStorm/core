@@ -12,7 +12,7 @@ from .const import DOMAIN
 
 API_DEFAULT = "http://ctek-ng-air.local/meter/"
 TITLE = "Nanogrid Air"
-DATA_DESC = "description"
+USER_DESC = "description"
 
 
 class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -28,38 +28,56 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
         """Handle a flow initiated by the user."""
         self._async_abort_entries_match()
 
-        # Attempt to automatically detect the device
-        if await get_ip():
-            mac_address = await fetch_mac()
-            if mac_address:
-                unique_id = mac_address
-                await self.async_set_unique_id(unique_id)
-                self._abort_if_unique_id_configured()
-                return self.async_create_entry(
-                    title=TITLE,
-                    data={CONF_URL: self._url},
-                )
+        errors = {}
 
-        # If automatic detection fails, ask for user input
+        data_schema = vol.Schema(
+            {vol.Required(CONF_URL, default=self._url, description=USER_DESC): str}
+        )
+
+        # Attempt to automatically detect the device
         if user_input is None:
+            try:
+                if await get_ip():
+                    mac_address = await fetch_mac()
+                    if mac_address:
+                        unique_id = mac_address
+                        await self.async_set_unique_id(unique_id)
+                        self._abort_if_unique_id_configured()
+                        return self.async_create_entry(
+                            title=TITLE,
+                            data={CONF_URL: self._url},
+                        )
+                    errors["base"] = "invalid_auth"
+                else:
+                    errors["base"] = "cannot_connect"
+            except ConnectionError:
+                errors["base"] = "cannot_connect"
+
             return self.async_show_form(
                 step_id="user",
-                data_schema=vol.Schema(
-                    {
-                        vol.Optional(CONF_URL, DATA_DESC): str,
-                    }
-                ),
+                data_schema=data_schema,
+                errors=errors,
             )
 
-        # Use the manually provided IP to attempt connection again
-        if await get_ip(user_input[CONF_URL]):
-            mac_address = await fetch_mac()
-            if mac_address:
-                unique_id = mac_address
-                await self.async_set_unique_id(unique_id)
-                self._abort_if_unique_id_configured()
-                return self.async_create_entry(
-                    title=TITLE,
-                    data={CONF_URL: user_input[CONF_URL]},
-                )
-        return self.async_abort(reason="not_responding")
+        # Handle user input
+        try:
+            if await get_ip(user_input[CONF_URL]):
+                mac_address = await fetch_mac()
+                if mac_address:
+                    unique_id = mac_address
+                    await self.async_set_unique_id(unique_id)
+                    self._abort_if_unique_id_configured()
+                    return self.async_create_entry(
+                        title=TITLE,
+                        data={CONF_URL: user_input[CONF_URL]},
+                    )
+                errors["base"] = "invalid_auth"
+            else:
+                errors["base"] = "cannot_connect"
+        except ConnectionError:
+            errors["base"] = "cannot_connect"
+        except Exception:  # noqa: BLE001
+            errors["base"] = "cannot_connect"
+            return self.async_abort(reason="not_responding")
+
+        return self.async_show_form(errors=errors)

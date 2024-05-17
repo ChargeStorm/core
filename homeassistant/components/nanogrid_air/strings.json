@@ -2,16 +2,17 @@
   "config": {
     "step": {
       "user": {
-        "description": "Couldn't automatically connect to the device. Please input the IP address."
+        "description": "Input IP address to connect to Nanogrid Air."
       }
     },
     "error": {
-      "not_responding": "Nanogrid Air is not responding. Ensure the device is powered and connected to your network, then try again.",
-      "single_instance_allowed": "Only one instance of Nanogrid Air can be configured. Please manage your existing device from the Integrations page."
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]"
     },
     "abort": {
-      "already_configured": "A Nanogrid Air device is already configured. If you need to reconfigure, please remove the existing instance first.",
-      "not_responding": "Connection attempt failed as Nanogrid Air did not respond. Check the device's network connectivity and power status."
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+      "not_responding": "Nanogrid Air is not responding. Ensure the device is powered and connected to your network, then try again."
     }
   }
 }
