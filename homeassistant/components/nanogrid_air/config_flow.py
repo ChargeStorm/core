@@ -76,6 +76,7 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
                 errors["base"] = "cannot_connect"
         except ConnectionError:
             errors["base"] = "cannot_connect"
+            return self.async_abort(reason="not_responding")
         except Exception:  # noqa: BLE001
             errors["base"] = "cannot_connect"
             return self.async_abort(reason="not_responding")

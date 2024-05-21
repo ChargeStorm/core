@@ -101,7 +101,6 @@ async def test_form_manual_entry_success(
     assert result["data"][CONF_URL] == "http://user-provided-url.local/meter/"
     assert len(mock_setup_entry.mock_calls) == 1
 
-    # Additional checks for user inputs
     assert CONF_URL in result["data"]
 
 
@@ -190,3 +189,53 @@ async def test_form_network_failure(
 
     assert result["type"] == FlowResultType.FORM
     assert result["errors"] == {"base": "cannot_connect"}
+
+
+async def test_form_user_input_exception(
+    hass: HomeAssistant, mock_setup_entry: AsyncMock
+) -> None:
+    """Test exception handling during user input."""
+    user_input = {CONF_URL: "http://user-provided-url.local/meter/"}
+
+    with (
+        patch(
+            "homeassistant.components.nanogrid_air.config_flow.get_ip",
+            side_effect=Exception("Test exception"),
+        ),
+        patch(
+            "homeassistant.components.nanogrid_air.config_flow.fetch_mac",
+            return_value="00:11:22:33:44:55",
+        ),
+    ):
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}, data=user_input
+        )
+        await hass.async_block_till_done()
+
+    assert result["type"] == FlowResultType.ABORT
+    assert result["reason"] == "not_responding"
+
+
+async def test_form_user_input_connection_error(
+    hass: HomeAssistant, mock_setup_entry: AsyncMock
+) -> None:
+    """Test handling ConnectionError during user input."""
+    user_input = {CONF_URL: "http://user-provided-url.local/meter/"}
+
+    with (
+        patch(
+            "homeassistant.components.nanogrid_air.config_flow.get_ip",
+            side_effect=ConnectionError,
+        ),
+        patch(
+            "homeassistant.components.nanogrid_air.config_flow.fetch_mac",
+            return_value="00:11:22:33:44:55",
+        ),
+    ):
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}, data=user_input
+        )
+        await hass.async_block_till_done()
+
+    assert result["type"] == FlowResultType.ABORT
+    assert result["reason"] == "not_responding"
