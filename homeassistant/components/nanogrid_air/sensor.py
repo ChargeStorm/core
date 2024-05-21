@@ -106,8 +106,7 @@ async def async_setup_entry(
     """Set up sensor entities for the integration entry."""
 
     async def update_data():
-        meter_data = await fetch_meter_data()
-        return meter_data
+        return await fetch_meter_data()
 
     coordinator = DataUpdateCoordinator(
         hass,

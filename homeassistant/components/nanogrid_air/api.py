@@ -4,8 +4,6 @@ import socket
 
 import aiohttp
 
-from homeassistant.core import _LOGGER
-
 device_ip: str | None = None
 
 
@@ -18,12 +16,9 @@ async def get_ip(users_ip=None):
     try:
         ip = socket.gethostbyname("ctek-ng-air.local")
         if ip:
-            _LOGGER.debug("Resolved IP: %s", ip)
             globals()["device_ip"] = ip
-            _LOGGER.debug("Device IP: %s", globals()["device_ip"])
             return True
-    except socket.gaierror as e:
-        _LOGGER.error("Failed to resolve hostname: %s", e)
+    except socket.gaierror:
         return False
 
 
@@ -36,16 +31,10 @@ async def fetch_mac():
             async with session.get(url_status) as api_status_response:
                 api_status_response.raise_for_status()
                 mac = await api_status_response.json()
-                mac_address = mac["deviceInfo"]["mac"]
-                return mac_address
-        except aiohttp.ClientError as exc:
-            _LOGGER.error("HTTP client error occurred: %s", exc)
-            await get_ip()
+                return mac["deviceInfo"]["mac"]
+        except aiohttp.ClientError:
             return {}
-        except aiohttp.HttpProcessingError as exc:
-            _LOGGER.error(
-                "HTTP request error occurred: %s - %s", exc.status, exc.message
-            )
+        except aiohttp.HttpProcessingError:
             return {}
 
 
@@ -57,14 +46,9 @@ async def fetch_meter_data():
         try:
             async with session.get(url_meter) as api_meter_response:
                 api_meter_response.raise_for_status()
-                api_meter_data = await api_meter_response.json()
-                return api_meter_data
-        except aiohttp.ClientError as exc:
-            _LOGGER.error("HTTP client error occurred: %s", exc)
+                return await api_meter_response.json()
+        except aiohttp.ClientError:
             await get_ip()
             return {}
-        except aiohttp.HttpProcessingError as exc:
-            _LOGGER.error(
-                "HTTP request error occurred: %s - %s", exc.status, exc.message
-            )
+        except aiohttp.HttpProcessingError:
             return {}
