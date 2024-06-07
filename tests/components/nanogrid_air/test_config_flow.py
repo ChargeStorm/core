@@ -2,6 +2,7 @@
 
 from unittest.mock import AsyncMock, patch
 
+from ctek import NanogridAir
 import pytest
 
 from homeassistant import config_entries
@@ -26,7 +27,7 @@ from homeassistant.data_entry_flow import FlowResultType
             "00:11:22:33:44:55",
             FlowResultType.CREATE_ENTRY,
             "Nanogrid Air",
-            {CONF_URL: "http://ctek-ng-air.local/meter/"},
+            {CONF_URL: NanogridAir().get_ip},
             None,
         ),
         (False, None, FlowResultType.FORM, None, None, {"base": "cannot_connect"}),

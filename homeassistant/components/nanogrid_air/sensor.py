@@ -2,6 +2,8 @@
 
 from datetime import timedelta
 
+from ctek import NanogridAir
+
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -23,8 +25,6 @@ from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
 )
-
-from .api import fetch_meter_data
 
 SENSOR = {
     "current_0": SensorEntityDescription(
@@ -106,7 +106,7 @@ async def async_setup_entry(
     """Set up sensor entities for the integration entry."""
 
     async def update_data():
-        return await fetch_meter_data()
+        return await NanogridAir().fetch_meter_data()
 
     coordinator = DataUpdateCoordinator(
         hass,
