@@ -2,7 +2,6 @@
 
 from unittest.mock import AsyncMock, patch
 
-from ctek import NanogridAir
 import pytest
 
 from homeassistant import config_entries
@@ -12,10 +11,20 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 
 
+class MockStatus:  # noqa: D101
+    def __init__(self, mac=None) -> None:  # noqa: D107
+        self.device_info = MockDeviceInfo(mac)
+
+
+class MockDeviceInfo:  # noqa: D101
+    def __init__(self, mac) -> None:  # noqa: D107
+        self.mac = mac
+
+
 @pytest.mark.parametrize(
     (
         "get_ip_return",
-        "fetch_mac_return",
+        "fetch_status_return",
         "result_type",
         "title",
         "data",
@@ -24,17 +33,17 @@ from homeassistant.data_entry_flow import FlowResultType
     [
         (
             True,
-            "00:11:22:33:44:55",
+            MockStatus(mac="00:11:22:33:44:55"),
             FlowResultType.CREATE_ENTRY,
             "Nanogrid Air",
-            {CONF_URL: NanogridAir().get_ip},
+            {CONF_URL: "http://ctek-ng-air.local/meter/"},
             None,
         ),
         (False, None, FlowResultType.FORM, None, None, {"base": "cannot_connect"}),
-        (True, None, FlowResultType.FORM, None, None, {"base": "invalid_auth"}),
+        (True, MockStatus(), FlowResultType.FORM, None, None, {"base": "invalid_auth"}),
         (
             False,
-            "00:11:22:33:44:55",
+            MockStatus(mac="00:11:22:33:44:55"),
             FlowResultType.FORM,
             None,
             None,
@@ -46,7 +55,7 @@ async def test_form_auto_detect(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
     get_ip_return,
-    fetch_mac_return,
+    fetch_status_return,
     result_type,
     title,
     data,
@@ -54,14 +63,8 @@ async def test_form_auto_detect(
 ) -> None:
     """Test auto-detect scenarios with different return values."""
     with (
-        patch(
-            "homeassistant.components.nanogrid_air.config_flow.get_ip",
-            return_value=get_ip_return,
-        ),
-        patch(
-            "homeassistant.components.nanogrid_air.config_flow.fetch_mac",
-            return_value=fetch_mac_return,
-        ),
+        patch("ctek.NanogridAir.get_ip", return_value=get_ip_return),
+        patch("ctek.NanogridAir.fetch_status", return_value=fetch_status_return),
     ):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
@@ -83,13 +86,10 @@ async def test_form_manual_entry_success(
     """Test manual entry success."""
     user_input = {CONF_URL: "http://user-provided-url.local/meter/"}
     with (
+        patch("ctek.NanogridAir.get_ip", return_value=True),
         patch(
-            "homeassistant.components.nanogrid_air.config_flow.get_ip",
-            return_value=True,
-        ),
-        patch(
-            "homeassistant.components.nanogrid_air.config_flow.fetch_mac",
-            return_value="00:11:22:33:44:55",
+            "ctek.NanogridAir.fetch_status",
+            return_value=MockStatus(mac="00:11:22:33:44:55"),
         ),
     ):
         result = await hass.config_entries.flow.async_init(
@@ -102,6 +102,7 @@ async def test_form_manual_entry_success(
     assert result["data"][CONF_URL] == "http://user-provided-url.local/meter/"
     assert len(mock_setup_entry.mock_calls) == 1
 
+    # Additional checks for user inputs
     assert CONF_URL in result["data"]
 
 
@@ -109,9 +110,7 @@ async def test_form_not_responding(
     hass: HomeAssistant, mock_setup_entry: AsyncMock
 ) -> None:
     """Test device not responding."""
-    with patch(
-        "homeassistant.components.nanogrid_air.config_flow.get_ip", return_value=False
-    ):
+    with patch("ctek.NanogridAir.get_ip", return_value=False):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
@@ -126,14 +125,8 @@ async def test_form_invalid_mac(
 ) -> None:
     """Test invalid MAC address handling."""
     with (
-        patch(
-            "homeassistant.components.nanogrid_air.config_flow.get_ip",
-            return_value=True,
-        ),
-        patch(
-            "homeassistant.components.nanogrid_air.config_flow.fetch_mac",
-            return_value=None,
-        ),
+        patch("ctek.NanogridAir.get_ip", return_value=True),
+        patch("ctek.NanogridAir.fetch_status", return_value=MockStatus()),
     ):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
@@ -145,26 +138,20 @@ async def test_form_invalid_mac(
 
 
 @pytest.mark.parametrize(
-    ("get_ip_return", "fetch_mac_return", "expected_errors"),
+    ("get_ip_return", "fetch_status_return", "expected_errors"),
     [
         (False, None, {"base": "cannot_connect"}),
-        (True, None, {"base": "invalid_auth"}),
+        (True, MockStatus(), {"base": "invalid_auth"}),
     ],
 )
 async def test_form_error_handling(
-    hass: HomeAssistant, get_ip_return, fetch_mac_return, expected_errors
+    hass: HomeAssistant, get_ip_return, fetch_status_return, expected_errors
 ) -> None:
     """Test handling various error scenarios."""
     user_input = {CONF_URL: "http://user-provided-url.local/meter/"}
     with (
-        patch(
-            "homeassistant.components.nanogrid_air.config_flow.get_ip",
-            return_value=get_ip_return,
-        ),
-        patch(
-            "homeassistant.components.nanogrid_air.config_flow.fetch_mac",
-            return_value=fetch_mac_return,
-        ),
+        patch("ctek.NanogridAir.get_ip", return_value=get_ip_return),
+        patch("ctek.NanogridAir.fetch_status", return_value=fetch_status_return),
     ):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}, data=user_input
@@ -179,10 +166,7 @@ async def test_form_network_failure(
     hass: HomeAssistant, mock_setup_entry: AsyncMock
 ) -> None:
     """Test handling network failures."""
-    with patch(
-        "homeassistant.components.nanogrid_air.config_flow.get_ip",
-        side_effect=ConnectionError,
-    ):
+    with patch("ctek.NanogridAir.get_ip", side_effect=ConnectionError):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
@@ -199,13 +183,10 @@ async def test_form_user_input_exception(
     user_input = {CONF_URL: "http://user-provided-url.local/meter/"}
 
     with (
+        patch("ctek.NanogridAir.get_ip", side_effect=Exception("Test exception")),
         patch(
-            "homeassistant.components.nanogrid_air.config_flow.get_ip",
-            side_effect=Exception("Test exception"),
-        ),
-        patch(
-            "homeassistant.components.nanogrid_air.config_flow.fetch_mac",
-            return_value="00:11:22:33:44:55",
+            "ctek.NanogridAir.fetch_status",
+            return_value=MockStatus(mac="00:11:22:33:44:55"),
         ),
     ):
         result = await hass.config_entries.flow.async_init(
@@ -213,6 +194,7 @@ async def test_form_user_input_exception(
         )
         await hass.async_block_till_done()
 
+    # Check that the flow was aborted due to the exception
     assert result["type"] == FlowResultType.ABORT
     assert result["reason"] == "not_responding"
 
@@ -224,13 +206,10 @@ async def test_form_user_input_connection_error(
     user_input = {CONF_URL: "http://user-provided-url.local/meter/"}
 
     with (
+        patch("ctek.NanogridAir.get_ip", side_effect=ConnectionError),
         patch(
-            "homeassistant.components.nanogrid_air.config_flow.get_ip",
-            side_effect=ConnectionError,
-        ),
-        patch(
-            "homeassistant.components.nanogrid_air.config_flow.fetch_mac",
-            return_value="00:11:22:33:44:55",
+            "ctek.NanogridAir.fetch_status",
+            return_value=MockStatus(mac="00:11:22:33:44:55"),
         ),
     ):
         result = await hass.config_entries.flow.async_init(
@@ -238,5 +217,6 @@ async def test_form_user_input_connection_error(
         )
         await hass.async_block_till_done()
 
+    # Check that the flow was aborted due to the connection error
     assert result["type"] == FlowResultType.ABORT
     assert result["reason"] == "not_responding"

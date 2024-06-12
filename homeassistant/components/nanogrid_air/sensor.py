@@ -149,23 +149,23 @@ class NanogridAirSensor(CoordinatorEntity, SensorEntity):
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
         data = self.coordinator.data
-        if data is None:
+        if data is None or isinstance(data, dict):
             return None
 
         if self._sensor_id.startswith("current_"):
             index = int(self._sensor_id.split("_")[-1])
-            return data.get("current", [None, None, None])[index]
+            return getattr(data, "current", [None])[index]
         if self._sensor_id.startswith("voltage_"):
             index = int(self._sensor_id.split("_")[-1])
-            return data.get("voltage", [None, None, None])[index]
+            return getattr(data, "voltage", [None])[index]
         if self._sensor_id == "power_in":
-            return data.get("activePowerIn", None)
+            return getattr(data, "active_power_in", None)
         if self._sensor_id == "power_out":
-            return data.get("activePowerOut", None)
+            return getattr(data, "active_power_out", None)
         if self._sensor_id == "total_energy_import":
-            return data.get("totalEnergyActiveImport", None)
+            return getattr(data, "total_energy_active_import", None)
         if self._sensor_id == "total_energy_export":
-            return data.get("totalEnergyActiveExport", None)
+            return getattr(data, "total_energy_active_export", None)
         return None
 
     @property

@@ -10,6 +10,7 @@ from homeassistant.const import CONF_URL
 
 from .const import DOMAIN
 
+API_DEFAULT = "http://ctek-ng-air.local/meter/"
 TITLE = "Nanogrid Air"
 USER_DESC = "description"
 
@@ -21,7 +22,7 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
 
     def __init__(self) -> None:
         """Initialize flow."""
-        self._url = NanogridAir().get_ip
+        self._url = API_DEFAULT
 
     async def async_step_user(self, user_input=None) -> ConfigFlowResult:
         """Handle a flow initiated by the user."""
@@ -37,7 +38,8 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is None:
             try:
                 if await NanogridAir().get_ip():
-                    mac_address = await NanogridAir().fetch_mac()
+                    status = await NanogridAir().fetch_status()
+                    mac_address = status.device_info.mac
                     if mac_address:
                         unique_id = mac_address
                         await self.async_set_unique_id(unique_id)
@@ -60,8 +62,9 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
 
         # Handle user input
         try:
-            if await NanogridAir().get_ip(user_input[CONF_URL]):
-                mac_address = await NanogridAir().fetch_mac()
+            if await NanogridAir(device_ip=user_input[CONF_URL]).get_ip():
+                status = await NanogridAir().fetch_status()
+                mac_address = status.device_info.mac
                 if mac_address:
                     unique_id = mac_address
                     await self.async_set_unique_id(unique_id)
