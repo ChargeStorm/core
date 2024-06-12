@@ -679,7 +679,7 @@ crownstone-sse==2.0.4
 crownstone-uart==2.1.0
 
 # homeassistant.components.nanogrid_air
-ctek==0.1.0
+ctek==0.2.0
 
 # homeassistant.components.datadog
 datadog==0.15.0
