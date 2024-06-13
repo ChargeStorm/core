@@ -10,7 +10,6 @@ from homeassistant.const import CONF_URL
 
 from .const import DOMAIN
 
-API_DEFAULT = "http://ctek-ng-air.local/meter/"
 TITLE = "Nanogrid Air"
 USER_DESC = "description"
 
@@ -20,10 +19,6 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    def __init__(self) -> None:
-        """Initialize flow."""
-        self._url = API_DEFAULT
-
     async def async_step_user(self, user_input=None) -> ConfigFlowResult:
         """Handle a flow initiated by the user."""
         self._async_abort_entries_match()
@@ -31,7 +26,7 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
         errors = {}
 
         data_schema = vol.Schema(
-            {vol.Required(CONF_URL, default=self._url, description=USER_DESC): str}
+            {vol.Required(CONF_URL, default="", description=USER_DESC): str}
         )
 
         # Attempt to automatically detect the device
@@ -46,7 +41,7 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
                         self._abort_if_unique_id_configured()
                         return self.async_create_entry(
                             title=TITLE,
-                            data={CONF_URL: self._url},
+                            data={CONF_URL: ""},
                         )
                     errors["base"] = "invalid_auth"
                 else:

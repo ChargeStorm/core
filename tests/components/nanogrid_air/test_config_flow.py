@@ -36,7 +36,7 @@ class MockDeviceInfo:  # noqa: D101
             MockStatus(mac="00:11:22:33:44:55"),
             FlowResultType.CREATE_ENTRY,
             "Nanogrid Air",
-            {CONF_URL: "http://ctek-ng-air.local/meter/"},
+            {CONF_URL: ""},
             None,
         ),
         (False, None, FlowResultType.FORM, None, None, {"base": "cannot_connect"}),
