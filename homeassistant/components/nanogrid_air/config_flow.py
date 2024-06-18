@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
+from ctek import NanogridAir
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_URL
 
-from .api import fetch_mac, get_ip
 from .const import DOMAIN
 
-API_DEFAULT = "http://ctek-ng-air.local/meter/"
 TITLE = "Nanogrid Air"
 USER_DESC = "description"
 
@@ -20,10 +19,6 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    def __init__(self) -> None:
-        """Initialize flow."""
-        self._url = API_DEFAULT
-
     async def async_step_user(self, user_input=None) -> ConfigFlowResult:
         """Handle a flow initiated by the user."""
         self._async_abort_entries_match()
@@ -31,21 +26,22 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
         errors = {}
 
         data_schema = vol.Schema(
-            {vol.Required(CONF_URL, default=self._url, description=USER_DESC): str}
+            {vol.Required(CONF_URL, default="", description=USER_DESC): str}
         )
 
         # Attempt to automatically detect the device
         if user_input is None:
             try:
-                if await get_ip():
-                    mac_address = await fetch_mac()
+                if await NanogridAir().get_ip():
+                    status = await NanogridAir().fetch_status()
+                    mac_address = status.device_info.mac
                     if mac_address:
                         unique_id = mac_address
                         await self.async_set_unique_id(unique_id)
                         self._abort_if_unique_id_configured()
                         return self.async_create_entry(
                             title=TITLE,
-                            data={CONF_URL: self._url},
+                            data={CONF_URL: ""},
                         )
                     errors["base"] = "invalid_auth"
                 else:
@@ -61,8 +57,9 @@ class NanogridAirConfigFlow(ConfigFlow, domain=DOMAIN):
 
         # Handle user input
         try:
-            if await get_ip(user_input[CONF_URL]):
-                mac_address = await fetch_mac()
+            if await NanogridAir(device_ip=user_input[CONF_URL]).get_ip():
+                status = await NanogridAir().fetch_status()
+                mac_address = status.device_info.mac
                 if mac_address:
                     unique_id = mac_address
                     await self.async_set_unique_id(unique_id)
